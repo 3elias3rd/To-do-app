@@ -23,3 +23,31 @@ def save_todos(todos):
     """Sava todos to JSON file"""
     with open(TODO_FILE, 'w') as f:
         json.dump(todos, f, indent=2)    
+
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    todos = load_todos()
+    active_count = sum(1 for todo in todos if not todo['completed'])
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "todos": todos,
+            "active_count": active_count
+        }
+    )
+
+@app.post("/add")
+def add_todo(task: str=Form(...)):
+    if task.strip():
+        todos = load_todos()
+        new_todo = {
+            "id": len(todos) + 1,
+            "task": task.strip(),
+            "completed": False
+        }
+        todos.append(new_todo)
+        save_todos(todos)
+    
+    return RedirectResponse(url="/", status_code=303)
+
