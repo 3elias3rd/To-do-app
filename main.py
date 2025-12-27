@@ -51,3 +51,18 @@ def add_todo(task: str=Form(...)):
     
     return RedirectResponse(url="/", status_code=303)
 
+@app.post("/toggle/{todo_id}")
+async def toggle_complete(todo_id:int):
+    todos = load_todos()
+    for todo in todos:
+        if todo['id'] == todo_id:
+            todo['completed'] = not todo['completed']
+            break
+
+@app.post("/delete/{todo_id}")
+async def delete_todo(todo_id:int):
+    todos = load_todos()
+    todos = [todo for todo in todos if todo['id'] != todo_id]
+    save_todos(todos)
+    return RedirectResponse(url="/", status_code=303)
+
