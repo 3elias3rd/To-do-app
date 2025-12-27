@@ -66,3 +66,19 @@ async def delete_todo(todo_id:int):
     save_todos(todos)
     return RedirectResponse(url="/", status_code=303)
 
+@app.post("/clear_todos")
+async def cleartodos():
+    todos = load_todos()
+    todos = [todo for todo in todos if not todo['completed']]
+    save_todos(todos)
+    return RedirectResponse(url="/", status_code=303)
+
+@app.get("/api/todos")
+async def get_todos():
+    """Get all todos in JSON format"""
+    return {"todos": load_todos()}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
