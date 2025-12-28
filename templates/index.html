@@ -1,15 +1,17 @@
-<ul>
-    {% for todo in todos %}
-    
-    <li>
-        <input type="checkbox" {% if todo.completed %}checked{% endif %} />
-        <span>{{todo.task}}</span>
-        <button>X</button>
-    </li>
-    {% endfor %}
-</ul>
+<div>
+    <ul>
+        {% for todo in todos %}
+        
+        <li>
+            <input type="checkbox" {% if todo.completed %}checked{% endif %} />
+            <span>{{todo.task}}</span>
+            <button>X</button>
+        </li>
+        {% endfor %}
+    </ul>
 
-<form action="/add" method="post"> 
-    <input name ="task" required />
-    <button type="submit">Add</button>
-</form>
+    <form action="/add" method="post"> 
+        <input name ="task" required />
+        <button type="submit">Add</button>
+    </form>
+</div>
