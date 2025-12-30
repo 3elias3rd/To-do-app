@@ -23,6 +23,15 @@
     cursor: pointer;
 }
 
+.add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.add-btn:active {
+    transform: translateY(0);
+}
+
 /* Todo list*/
 .todo-list{
     list-style: none;
