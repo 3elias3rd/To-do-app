@@ -14,7 +14,6 @@ TODO_FILE = Path("todos.json")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-
 def load_todos():
     """Load todos from JSON file"""
     if TODO_FILE.exists():

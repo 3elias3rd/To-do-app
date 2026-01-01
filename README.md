@@ -24,3 +24,11 @@ This project is intentionally simple and is meant to demonstrate basic full-stac
 
 ## Project Structure
 
+project/
+├── main.py                 
+├── todos.json              
+├── templates/
+│   └── index.html       
+├── static/
+│   └── style.css         
+└── README.md              
