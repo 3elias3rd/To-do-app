@@ -1,11 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Todo App</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+
+<body>
+    
+
 <div class="todo-app">
     <ul class="todo-list">
         {% for todo in todos %}
         
-        <li>
-            <input type="checkbox" {% if todo.completed %}checked{% endif %} />
-            <span>{{todo.task}}</span>
-            <button>X</button>
+        <li class="todo-item {% if todo.completed %}completed{% endif %}">
+            <form action="/toggle/{{ todo.id }}" method="post" class="toggle-form">
+                <button class="checkbox" type="submit">
+                    {% if todo.completed %}✓{% endif %}
+                </button>
+            </form>
+            <span class="task-text">{{ todo.task }}</span>
+            <form action="/delete/{{ todo.id }}" method="post" class="delete-form">
+                <button class="delete-btn" type="submit">×</button>
+            </form>
         </li>
         {% endfor %}
     </ul>
@@ -15,3 +33,6 @@
         <button type="submit">Add</button>
     </form>
 </div>
+
+</body>
+</html>

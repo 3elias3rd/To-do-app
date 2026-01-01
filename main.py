@@ -12,6 +12,9 @@ templates = Jinja2Templates(directory="templates")
 
 TODO_FILE = Path("todos.json")
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
 def load_todos():
     """Load todos from JSON file"""
     if TODO_FILE.exists():
@@ -58,6 +61,8 @@ async def toggle_complete(todo_id:int):
         if todo['id'] == todo_id:
             todo['completed'] = not todo['completed']
             break
+    save_todos(todos)
+    return RedirectResponse(url="/", status_code=303)
 
 @app.post("/delete/{todo_id}")
 async def delete_todo(todo_id:int):
