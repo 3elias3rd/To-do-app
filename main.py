@@ -11,12 +11,10 @@ app = FastAPI(title="Clean To Do App")
 
 templates = Jinja2Templates(directory="templates")
 
-TODO_FILE = Path("todos.json")
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
+def home(request: Request):
     todos = load_todos()
     active_count = sum(1 for todo in todos if not todo['completed'])
     return templates.TemplateResponse(
@@ -35,7 +33,7 @@ def add_todo(task: str=Form(...)):
     return RedirectResponse(url="/", status_code=303)
 
 @app.post("/toggle/{todo_id}")
-async def toggle_complete(todo_id:int):
+def toggle_complete(todo_id:int):
     todos = load_todos()
     for todo in todos:
         if todo['id'] == todo_id:
@@ -45,17 +43,17 @@ async def toggle_complete(todo_id:int):
     return RedirectResponse(url="/", status_code=303)
 
 @app.post("/delete/{todo_id}")
-async def delete_selected_todo(todo_id:int):
+def delete_selected_todo(todo_id:int):
     delete_todo(todo_id)
     return RedirectResponse(url="/", status_code=303)
 
 @app.post("/clear_completed")
-async def clear_completed():
+def clear_completed():
     clear_todo()
     return RedirectResponse(url="/", status_code=303)
 
 @app.get("/api/todos")
-async def get_todos():
+def get_todos():
     """Get all todos in JSON format"""
     return {"todos": load_todos()}
 

@@ -31,10 +31,10 @@ def load_todos():
 
     return [dict(todo) for todo in todos]
 
-def save_todos(task, completed):
+def save_todos(task, completed=False):
     db = Database()
     cursor = db.get_cursor()
-    cursor.execute("INSERT INTO todos (task, completed) VALUES(%s, %s) Returning id:", (task, completed))
+    cursor.execute("INSERT INTO todos (task, completed) VALUES(%s, %s) Returning id;", (task, completed))
 
     new_id = cursor.fetchone()['id']
     db.commit()
