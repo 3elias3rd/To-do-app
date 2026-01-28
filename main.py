@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from typing import Optional
 from pathlib import Path
 import json
-from database import load_todos, save_todos, clear_todo, delete_todo, update_todos
+from alchemy_database import load_todos, save_todos, clear_todo, delete_todo, update_todos
 
 app = FastAPI(title="Clean To Do App")
 
@@ -34,12 +34,7 @@ def add_todo(task: str=Form(...)):
 
 @app.post("/toggle/{todo_id}")
 def toggle_complete(todo_id:int):
-    todos = load_todos()
-    for todo in todos:
-        if todo['id'] == todo_id:
-            new_status = not todo['completed']
-            update_todos(todo_id, new_status)
-            break
+    update_todos(todo_id)
     return RedirectResponse(url="/", status_code=303)
 
 @app.post("/delete/{todo_id}")
