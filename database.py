@@ -1,72 +1,83 @@
-import psycopg2
-from psycopg2.extras import RealDictCursor
+from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, Session, sessionmaker
+from sqlalchemy import create_engine, select, delete
 from password import password
 
-class Database:
-    def __init__(self):
-        self.conn=psycopg2.connect(
-            host="localhost",
-            database="todo_app_db",
-            user="postgres",
-            password=password
-        )
-    
-    def get_cursor(self):
-        return self.conn.cursor(cursor_factory=RealDictCursor)
-    
-    def commit(self):
-        self.conn.commit()
-    
-    def close(self):
-        self.conn.close()
-    
+database_URL = (f"postgresql://postgres:{password}@localhost:5432/todo_app_db")
+
+engine = create_engine(database_URL, echo=True)
+
+SessionLocal = sessionmaker(bind=engine)
+
+class Base(DeclarativeBase):
+    pass
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str]
+    email: Mapped[str]
+    hashed_password: Mapped[str]
+
+class Todo(Base):
+    __tablename__ = "todos"
+    id:  Mapped[int] = mapped_column(primary_key=True)
+    task: Mapped[str]
+    completed: Mapped[bool]
+
 def load_todos():
-    db = Database()
-    cursor = db.get_cursor()
+    with Session(engine) as session:
+        stmt = select(Todo).order_by(Todo.id)
+        result = session.execute(stmt)
+       
+        return [
+            {
+                "id": todo.id,
+                "task": todo.task,
+                "completed":todo.completed,
+            } 
+            for todo in result.scalars()]
 
-    cursor.execute("SELECT * FROM todos ORDER BY id;")
-    todos = cursor.fetchall()
-    cursor.close()
-    db.close()
-
-    return [dict(todo) for todo in todos]
-
-def save_todos(task, completed=False):
-    db = Database()
-    cursor = db.get_cursor()
-    cursor.execute("INSERT INTO todos (task, completed) VALUES(%s, %s) Returning id;", (task, completed))
-
-    new_id = cursor.fetchone()['id']
-    db.commit()
-    cursor.close()
-    db.close()
-
-def update_todos(todo_id, completed):
-    db = Database()
-    cursor = db.get_cursor()
+def save_todos(task, completed=False): 
+    with Session(engine) as session:
+        todo = Todo(task=task, completed=completed)
+        session.add(todo)
+        session.commit()
+        return(todo.id)
     
-    cursor.execute("UPDATE todos SET completed=%s WHERE id=%s;", (completed, todo_id))
+def update_todos(todo_id: int):
+    with Session(engine) as session:
+        todo = session.get(Todo, todo_id)
 
-    db.commit()
-    cursor.close()
-    db.close()
+        todo.completed = not todo.completed
+        session.commit()
+        session.refresh(todo)
+
+        return {
+            "id": todo.id,
+            "task": todo.task,
+            "completed": todo.completed,
+        }   
 
 def delete_todo(todo_id):
-    db = Database()
-    cursor = db.get_cursor()
+    with Session(engine) as session:
+        todo = session.get(Todo, todo_id)
+        
+        session.delete(todo)
+        session.commit()
 
-    cursor.execute("DELETE FROM todos WHERE id=%s;", (todo_id,))
-
-    db.commit()
-    cursor.close()
-    db.close()
+    return True
 
 def clear_todo():
-    db = Database()
-    cursor = db.get_cursor()
+    with Session(engine) as session:
+        stmt = delete(Todo).where(Todo.completed == True)
+        session.execute(stmt)
+        session.commit()
+        
 
-    cursor.execute("DELETE FROM todos WHERE completed=True;")
-
-    db.commit()
-    cursor.close()
-    db.close()
